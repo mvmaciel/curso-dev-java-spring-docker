@@ -1,8 +1,10 @@
 package br.com.tarefas.service;
 
+import br.com.tarefas.dto.TarefaDTO;
 import br.com.tarefas.entity.Tarefa;
+import br.com.tarefas.exception.TarefaNotFound;
+import br.com.tarefas.mapper.TarefaMapper;
 import br.com.tarefas.repository.TarefaRepository;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,32 +17,38 @@ public class TarefaService {
     @Autowired
     private TarefaRepository tarefaRepository;
 
+    @Autowired
+    private TarefaMapper tarefaMapper;
 
-    public Tarefa recuperarTarefa(Long id) {
+    public TarefaDTO recuperarTarefa(Long id) {
         Optional<Tarefa> tarefaOp = tarefaRepository.findById(id);
-        return tarefaOp.orElseThrow(() -> new EntityNotFoundException("Tarefa com o ID "+id+" não encontrado"));
+
+        Tarefa tarefa = tarefaOp.orElseThrow(() -> new TarefaNotFound("Tarefa com o ID "+id+" não encontrado"));
+        return tarefaMapper.toDTO(tarefa);
     }
 
-    public Tarefa adicionarTarefa(Tarefa tarefa) {
-        return tarefaRepository.save(tarefa);
+    public TarefaDTO adicionarTarefa(TarefaDTO tarefa) {
+        Tarefa tarefaEntity = tarefaMapper.toEntity(tarefa);
+        return tarefaMapper.toDTO(tarefaRepository.save(tarefaEntity));
     }
 
-    public List<Tarefa> recuperaTarefas() {
-        return  tarefaRepository.findAll();
+    public List<TarefaDTO> recuperaTarefas() {
+        return tarefaMapper.toDTOList(tarefaRepository.findAll());
     }
 
-    public Tarefa atualizaTarefa(Long id, Tarefa tarefa) {
+    public TarefaDTO atualizaTarefa(Long id, TarefaDTO tarefa) {
+        Tarefa tarefaEntity = tarefaMapper.toEntity(tarefa);
         Optional<Tarefa> tarefaOp = tarefaRepository.findById(id);
         if(tarefaOp.isPresent()) {
-            tarefa.setId(id);
-            return tarefaRepository.save(tarefa);
+            tarefaEntity.setId(id);
+            return tarefaMapper.toDTO(tarefaRepository.save(tarefaEntity));
         }
-        throw new EntityNotFoundException("Tarefa com o ID "+id+" não encontrado");
+        throw new TarefaNotFound("Tarefa com o ID "+id+" não encontrado");
     }
 
     public void deletarTarefa(Long id){
         if(!tarefaRepository.existsById(id)) {
-            throw new EntityNotFoundException("Tarefa com o ID "+id+" não encontrado");
+            throw new TarefaNotFound("Tarefa com o ID "+id+" não encontrado");
         }
         tarefaRepository.deleteById(id);
     }
