@@ -3,13 +3,14 @@ package br.com.tarefas.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
-@Getter
-@Setter
+@Data
 public class TarefaDTO {
 
     private Long id;
@@ -31,4 +32,10 @@ public class TarefaDTO {
 
     @NotNull(message = "Data e hora são obrigatórios")
     private LocalDateTime dataHora;
+
+    @NotNull(message = "Nenhum convidado foi selecionado")
+    private List<String> convidados;
+
+    @NotNull
+    private UsuarioDTO criador;
 }
