@@ -1,9 +1,7 @@
 package br.com.tarefas.mapper;
 
 import br.com.tarefas.dto.TarefaDTO;
-import br.com.tarefas.entity.Convidado;
 import br.com.tarefas.entity.Tarefa;
-import br.com.tarefas.entity.Usuario;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;

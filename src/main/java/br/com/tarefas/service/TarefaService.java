@@ -23,14 +23,12 @@ public class TarefaService {
 
     @Autowired
     private UsuarioService usuarioService;
-
     @Autowired
     private TarefaMapper tarefaMapper;
 
     public TarefaDTO recuperarTarefa(Long id) {
         Optional<Tarefa> tarefaOp = tarefaRepository.findById(id);
-
-        Tarefa tarefa = tarefaOp.orElseThrow(() -> new TarefaNotFound("Tarefa com o ID " + id + " não encontrado"));
+        Tarefa tarefa = tarefaOp.orElseThrow(() -> new TarefaNotFound("Tarefa com o ID "+id+" não encontrado"));
         return tarefaMapper.toDTO(tarefa);
     }
 
