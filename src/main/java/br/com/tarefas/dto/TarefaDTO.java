@@ -34,7 +34,7 @@ public class TarefaDTO {
     private LocalDateTime dataHora;
 
     @NotNull(message = "Nenhum convidado foi selecionado")
-    private List<String> convidados;
+    private List<ConvidadoDTO> convidados;
 
     @NotNull
     private UsuarioDTO criador;

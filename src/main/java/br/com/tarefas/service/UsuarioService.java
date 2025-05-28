@@ -1,5 +1,6 @@
 package br.com.tarefas.service;
 
+import br.com.tarefas.dto.ConvidadoDTO;
 import br.com.tarefas.dto.TarefaDTO;
 import br.com.tarefas.dto.UsuarioDTO;
 import br.com.tarefas.entity.Convidado;
@@ -42,8 +43,9 @@ public class UsuarioService {
         return usuarioMapper.toDtoList(usuarioRepository.findAll());
     }
 
-    public List<Usuario> validaConvidadoExistente(List<String> email) {
+    public List<Usuario> validaConvidadoExistente(List<ConvidadoDTO> email) {
         List<Usuario> usuariosEncontrados = email.stream()
+                .map(ConvidadoDTO::getEmail)
                 .map(usuarioRepository::findByEmail)
                 .flatMap(Optional::stream)
                 .collect(Collectors.toList());

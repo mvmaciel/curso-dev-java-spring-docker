@@ -53,6 +53,11 @@ public class TarefaService {
         Optional<Tarefa> tarefaOp = tarefaRepository.findById(id);
         if (tarefaOp.isPresent()) {
             tarefaEntity.setId(id);
+            List<Usuario> usuariosConvidados = usuarioService.validaConvidadoExistente(tarefa.getConvidados());
+            List<Convidado> convidados = usuariosConvidados.stream()
+                    .map(usuario -> new Convidado(tarefaEntity, usuario))
+                    .collect(Collectors.toList());
+            tarefaEntity.setConvidados(convidados);
             return tarefaMapper.toDTO(tarefaRepository.save(tarefaEntity));
         }
         throw new TarefaNotFound("Tarefa com o ID " + id + " não encontrado");
