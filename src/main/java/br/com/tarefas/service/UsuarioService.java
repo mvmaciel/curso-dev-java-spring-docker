@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -43,23 +42,26 @@ public class UsuarioService {
         return usuarioMapper.toDtoList(usuarioRepository.findAll());
     }
 
-    public List<Usuario> validaConvidadoExistente(List<ConvidadoDTO> email) {
-        List<Usuario> usuariosEncontrados = email.stream()
+    public List<Usuario> buscarUsuariosPorEmail(List<ConvidadoDTO> email) {
+        return email.stream()
                 .map(ConvidadoDTO::getEmail)
                 .map(usuarioRepository::findByEmail)
                 .flatMap(Optional::stream)
                 .collect(Collectors.toList());
-        return usuariosEncontrados;
     }
 
     @Transactional
     public UsuarioDTO atualizaUsuario(Long id, UsuarioDTO atualizado) {
-        Usuario usuario = usuarioRepository.findById(id).orElseThrow(() -> new UsuarioNotFound("Usuário não encontrado"));
+        Usuario usuario = buscarOuFalhar(id);
 
         usuario.setNome(atualizado.getNome());
         usuario.setTelefone(atualizado.getTelefone());
         usuario.setEmail(atualizado.getEmail());
         return usuarioMapper.toDTO(usuario);
+    }
+
+    private Usuario buscarOuFalhar(Long id) {
+        return usuarioRepository.findById(id).orElseThrow(() -> new UsuarioNotFound("Usuário não encontrado"));
     }
 
     public List<TarefaDTO> buscaTarefasConvidado(Long usuarioId) {
