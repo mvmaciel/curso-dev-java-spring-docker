@@ -13,10 +13,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-@Mapper(componentModel = "spring",uses = { ConvidadoMapper.class }, unmappedSourcePolicy = ReportingPolicy.IGNORE)
+@Mapper(componentModel = "spring",uses = { ConvidadoMapper.class, ConvidadoPendenteMapper.class }, unmappedSourcePolicy = ReportingPolicy.IGNORE)
 public interface TarefaMapper {
 
     @Mapping(target = "convidados", source = "convidados")
+    @Mapping(target = "convidadoPendente", source = "convidadoPendente")
     TarefaDTO toDTO(Tarefa tarefa);
 
     Tarefa toEntity(TarefaDTO dto);
