@@ -5,3 +5,4 @@ CREATE TABLE tarefa (
     local VARCHAR(255) NOT NULL,
     data_hora DATETIME NOT NULL
 );
+

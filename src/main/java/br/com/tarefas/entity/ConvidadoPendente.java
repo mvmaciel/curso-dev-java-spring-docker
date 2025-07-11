@@ -30,5 +30,8 @@ public class ConvidadoPendente {
     @Column(name = "convidado_email")
     private String convidadoEmail;
 
+    @Column(name = "keycloak_id")
+    private String keycloakId;
+
 
 }

@@ -10,9 +10,13 @@ import br.com.tarefas.mapper.TarefaMapper;
 import br.com.tarefas.repository.TarefaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,7 +37,7 @@ public class TarefaService {
 
     private Tarefa buscarOuFalhar(Long id) {
         return tarefaRepository.findById(id)
-                .orElseThrow(() -> new TarefaNotFound("Tarefa com o ID "+ id +" não encontrado"));
+                .orElseThrow(() -> new TarefaNotFound("Tarefa com o ID " + id + " não encontrado"));
     }
 
     public TarefaDTO adicionarTarefa(TarefaDTO tarefa) {
@@ -41,7 +45,19 @@ public class TarefaService {
 
         atribuirConvidados(tarefa, tarefaEntity);
 
-        return tarefaMapper.toDTO(tarefaRepository.save(tarefaEntity));
+        TarefaDTO tarefaDTO = tarefaMapper.toDTO(tarefaRepository.save(tarefaEntity));
+
+        if (!tarefaDTO.getConvidadoPendente().isEmpty()) {
+            List<Mono<Integer>> usuariosMonos = tarefaEntity.getConvidadoPendente().stream()
+                    .filter(c -> c.getKeycloakId() == null || c.getKeycloakId().isBlank())
+                    .map(usuarioService::keycloakCriarNovoUsuario)
+                    .toList();
+
+            Integer usuariosCriados = Flux.merge(usuariosMonos)
+                    .reduce(0, Integer::sum).block();
+            System.out.println("Total de usuários criados no keycloak: " + usuariosCriados);
+        }
+        return tarefaDTO;
     }
 
     private void atribuirConvidadosValidos(TarefaDTO tarefa, Tarefa tarefaEntity) {
@@ -52,7 +68,7 @@ public class TarefaService {
         tarefaEntity.setConvidados(convidados);
     }
 
-    private void atribuirConvidadosPendentes(TarefaDTO tarefa, Tarefa tarefaEntity){
+    private void atribuirConvidadosPendentes(TarefaDTO tarefa, Tarefa tarefaEntity) {
         List<String> emailsConvidadosExistentes = tarefaEntity.getConvidados().stream()
                 .map(convidado -> convidado.getUsuario().getEmail())
                 .toList();
@@ -61,6 +77,18 @@ public class TarefaService {
                 .filter(dto -> !emailsConvidadosExistentes.contains(dto.getEmail()))
                 .map(dto -> new ConvidadoPendente(tarefaEntity, dto.getNome(), dto.getEmail()))
                 .toList();
+
+        List<ConvidadoPendente> usuarioKeycloakPendente = usuarioService.buscaUsuariosPendentesNoKeycloak(convidadoPendentes);
+
+        Map<String, ConvidadoPendente> mapUsuarioKeycloak = usuarioKeycloakPendente.stream()
+                .collect(Collectors.toMap(ConvidadoPendente::getConvidadoEmail, Function.identity()));
+
+        convidadoPendentes.forEach(convidado -> {
+            ConvidadoPendente keycloakPendente = mapUsuarioKeycloak.get(convidado.getConvidadoEmail());
+            if (keycloakPendente != null) {
+                convidado.setKeycloakId(keycloakPendente.getKeycloakId());
+            }
+        });
 
         tarefaEntity.setConvidadoPendente(convidadoPendentes);
     }

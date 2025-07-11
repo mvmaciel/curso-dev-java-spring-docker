@@ -1,6 +1,7 @@
 ALTER TABLE `curso-database`.tarefa DROP FOREIGN KEY fk_tarefa_usuario;
 ALTER TABLE `curso-database`.tarefa DROP COLUMN criadorId;
 ALTER TABLE `curso-database`.convidados DROP FOREIGN KEY convidados_ibfk_2;
+ALTER TABLE `curso-database`.convidados DROP FOREIGN KEY convidados_ibfk_1;
 ALTER TABLE `curso-database`.convidados DROP COLUMN usuarioId;
 ALTER TABLE `curso-database`.convidados DROP COLUMN tarefaId;
 
